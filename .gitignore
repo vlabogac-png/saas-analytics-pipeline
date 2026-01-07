@@ -1,0 +1,52 @@
+# Environment variables (NIEMALS committen!)
+.env
+*.env
+.env.*
+
+# Airflow Runtime
+airflow/logs/
+airflow/__pycache__/
+airflow/**/__pycache__/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Docker
+docker-compose.override.yml
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data files (falls du später lokale CSVs generierst)
+data/raw/*.csv
+data/raw/*.json
+!data/raw/.gitkeep
+
+# PostgreSQL dumps
+*.sql.gz
+*.dump
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Jupyter Notebooks (falls du später explorative Analyse machst)
+.ipynb_checkpoints/
+*.ipynb
