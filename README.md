@@ -1,166 +1,187 @@
 # SaaS Analytics Pipeline
 
-A production-grade data engineering pipeline for SaaS product analytics, built with Apache Airflow, PostgreSQL, and Docker. This project demonstrates end-to-end ETL practices with a 4-layer data architecture and real-time analytics dashboards.
+A production-grade data engineering project that processes **11.4 million** synthetic SaaS events through a 4-layer ETL architecture using Apache Airflow, PostgreSQL, and Metabase.
 
-![Architecture](https://img.shields.io/badge/Architecture-4--Layer%20ETL-blue)
-![Python](https://img.shields.io/badge/Python-3.11-green)
-![Airflow](https://img.shields.io/badge/Airflow-2.8-red)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
+![Dashboard Screenshot](dashboard_screenshot.png)
 
 ## 🎯 Project Overview
 
-This pipeline processes synthetic SaaS product events (user logins, document edits, feature usage) through a multi-layer architecture:
+This project demonstrates end-to-end data engineering skills by building a complete analytics pipeline for a fictional SaaS product. The pipeline processes user events, transforms them through multiple layers, and provides actionable insights through interactive dashboards.
 
-```
-Raw Events (JSON) → Staging (Typed) → Core (Star Schema) → Analytics (Materialized Views)
-```
+**Key Highlights:**
+- 📊 **11.4M events** processed (Jan 2024 - Jan 2026)
+- 🏗️ **4-layer architecture**: Raw → Staging → Core → Analytics
+- ⚙️ **Automated orchestration** with Apache Airflow
+- 📈 **Interactive dashboards** in Metabase
+- 🐳 **Fully containerized** with Docker Compose
 
-**Key Features:**
-- 📊 **1.8M+ synthetic events** covering 6 months of activity
-- 🔄 **Automated ETL** orchestrated by Airflow DAGs
-- 🗄️ **Star schema** with dimension and fact tables
-- 📈 **Analytics layer** with retention cohorts, feature adoption, and churn risk
-- 🎨 **Metabase dashboards** for business intelligence
-- 🐳 **Fully Dockerized** infrastructure
+---
+
+## 📊 Live Dashboard
+
+The **Executive Overview** dashboard provides real-time insights:
+
+- **Total Users**: 6,000 registered users
+- **Daily Active Users**: Trend analysis showing engagement patterns
+- **User Retention Cohorts**: 100% retention for 2024-01 cohort over 3 months
+- **Feature Adoption**: Export to PDF leads with 300k+ uses
+- **Churn Risk Distribution**: 40% active users, 60% high-risk
+
+**Access:** http://localhost:3000 (after running `docker-compose up`)
+
+---
 
 ## 🏗️ Architecture
 
-### Data Layers
+### Data Flow
+```
+Synthetic Event Generator (Python)
+    ↓
+Raw Layer (JSONB storage in PostgreSQL)
+    ↓
+Staging Layer (Parsed & validated events)
+    ↓
+Core Layer (Star Schema: 4 dimensions + 2 facts)
+    ↓
+Analytics Layer (3 materialized views)
+    ↓
+Metabase Dashboard (BI visualization)
+```
 
-1. **Raw Layer** (`raw` schema)
-   - Immutable JSON events stored as JSONB
-   - Batch tracking and audit trails
-
-2. **Staging Layer** (`staging` schema)
-   - Parsed and typed event data
-   - Deduplication and basic validation
-
-3. **Core Layer** (`core` schema)
-   - **Star Schema Design:**
-     - Dimensions: `dim_users`, `dim_documents`, `dim_features`, `dim_date`
-     - Facts: `fact_events`, `fact_daily_user_activity`
-
-4. **Analytics Layer** (`analytics` schema)
-   - Materialized views for performance:
-     - `user_retention_cohorts`
-     - `feature_adoption_funnel`
-     - `churn_risk_scores`
-
-### Tech Stack
+### Technology Stack
 
 | Component | Technology |
-|-----------|-----------|
+|-----------|------------|
 | **Orchestration** | Apache Airflow 2.8 |
 | **Data Warehouse** | PostgreSQL 15 |
 | **BI Tool** | Metabase |
 | **Language** | Python 3.11, SQL |
 | **Infrastructure** | Docker Compose |
+| **Version Control** | Git/GitHub |
 
-## 📁 Project Structure
+---
 
-```
-saas-analytics-pipeline/
-├── airflow/
-│   ├── dags/                      # Airflow DAG definitions (auto-synced)
-│   ├── logs/                      # Execution logs (gitignored)
-│   └── plugins/                   # Custom operators/hooks
-├── dags/
-│   └── saas_analytics_dag.py      # Main ETL pipeline DAG
-├── sql/
-│   ├── ddl/                       # Schema definitions (empty - schemas created via init scripts)
-│   └── transformations/
-│       ├── raw_to_staging.sql     # Parse JSON to typed columns
-│       ├── staging_to_core.sql    # Load star schema
-│       └── refresh_analytics.sql  # Refresh materialized views
-├── src/
-│   ├── ingestion/
-│   │   └── event_generator.py     # Synthetic event generator
-│   └── utils/                     # Shared utilities
-├── generate_realistic_events.py   # Script to generate historical events (Jan-Jun 2024)
-├── generate_current_events.py     # Script to generate current events (Jul 2024-Jan 2026)
-├── docker-compose.yml             # Infrastructure definition
-├── requirements.txt               # Python dependencies
-└── .env.example                   # Environment variables template
-```
+## 🗄️ Database Schema
+
+### Core Layer (Star Schema)
+
+**Dimensions:**
+- `dim_users` (2,500 users) - User profiles with SCD Type 2
+- `dim_documents` (4,000 docs) - Document metadata
+- `dim_features` (8 features) - Product features
+- `dim_date` (2,555 days) - Date dimension (2020-2026)
+
+**Facts:**
+- `fact_events` (11.4M rows) - Granular event-level data
+- `fact_daily_user_activity` (673k rows) - Daily aggregations
+
+### Analytics Layer (Materialized Views)
+
+1. **user_retention_cohorts** - Monthly cohort retention analysis
+2. **feature_adoption_funnel** - Feature usage metrics and engagement
+3. **churn_risk_scores** - User churn risk classification (active/low/medium/high)
+
+---
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+- Docker Desktop (4GB+ RAM recommended)
+- Available ports: 5432, 8080, 3000, 5050
 
-- Docker Desktop (or Docker Engine + Docker Compose)
-- 4GB+ free RAM
-- Ports available: `5432` (PostgreSQL), `8080` (Airflow), `3000` (Metabase), `5050` (pgAdmin)
+### Installation
 
-### Setup
-
-**1. Clone the repository:**
 ```bash
+# 1. Clone the repository
 git clone https://github.com/vlabogac-png/saas-analytics-pipeline.git
 cd saas-analytics-pipeline
-```
 
-**2. Configure environment:**
-```bash
-cp .env.example .env
-# Edit .env with your credentials (or use defaults for local development)
-```
-
-**3. Generate Airflow UID (macOS/Linux):**
-```bash
+# 2. Set up environment variables
+cp env.example .env
 echo "AIRFLOW_UID=$(id -u)" >> .env
-```
 
-**4. Start infrastructure:**
-```bash
+# 3. Start all services
 docker-compose up -d
+
+# 4. Wait for initialization (~2 minutes)
+docker-compose logs -f airflow-init
+
+# 5. Access the UIs
+# Airflow: http://localhost:8080 (admin/admin)
+# Metabase: http://localhost:3000
+# pgAdmin: http://localhost:5050
 ```
 
-**5. Wait for services to be healthy (~2 minutes):**
+### Generate Sample Data (Optional)
+
+Data is already included, but you can regenerate:
+
 ```bash
-docker ps
-```
-
-**6. Access the UIs:**
-- **Airflow:** http://localhost:8080 (username: `admin`, password: `admin`)
-- **Metabase:** http://localhost:3000
-- **pgAdmin:** http://localhost:5050 (credentials in `.env`)
-
-### Generate Sample Data
-
-**Option 1: Historical data (Jan-Jun 2024, ~1.8M events):**
-```bash
-# Activate virtual environment
+# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Generate events
-python generate_realistic_events.py
-```
-
-**Option 2: Current data (Jul 2024-Jan 2026, ~5.5M events):**
-```bash
+# Generate events (Jan 2024 - Jan 2026)
 python generate_current_events.py
 ```
 
 ### Run the ETL Pipeline
 
-**Trigger the Airflow DAG:**
 ```bash
+# Trigger the Airflow DAG
 docker exec saas_airflow_webserver airflow dags trigger saas_analytics_pipeline
+
+# Monitor progress in Airflow UI
+open http://localhost:8080
 ```
 
-**Monitor execution:**
-- Open Airflow UI: http://localhost:8080
-- Navigate to DAGs → `saas_analytics_pipeline`
-- View task logs and execution graph
+---
 
-## 🔄 ETL Pipeline Flow
+## 📁 Project Structure
 
-The Airflow DAG (`saas_analytics_dag.py`) orchestrates the following tasks:
+```
+saas-analytics-pipeline/
+├── airflow/                    # Airflow home directory
+│   ├── dags/                   # Auto-synced from /dags
+│   └── logs/                   # Execution logs
+├── dags/
+│   └── saas_analytics_dag.py   # Main ETL pipeline DAG
+├── sql/
+│   ├── ddl/                    # Schema definitions
+│   │   ├── 01_raw_layer.sql
+│   │   ├── 02_staging_layer.sql
+│   │   ├── 03_core_layer.sql
+│   │   └── 04_analytics_layer.sql
+│   └── transformations/
+│       ├── raw_to_staging.sql
+│       ├── staging_to_core.sql
+│       └── refresh_analytics.sql
+├── src/
+│   ├── ingestion/
+│   │   └── event_generator.py  # Synthetic event generator
+│   └── utils/
+├── generate_realistic_events.py   # Historical data generator
+├── generate_current_events.py     # Current data generator
+├── docker-compose.yml
+├── requirements.txt
+├── env.example
+├── dashboard_screenshot.png
+└── README.md
+```
 
+---
+
+## 🔄 ETL Pipeline Details
+
+### Airflow DAG: `saas_analytics_pipeline`
+
+**Schedule:** Daily @ 2:00 UTC  
+**Execution Time:** ~5-10 minutes
+
+**Task Flow:**
 ```
 raw_to_staging
     ├─> load_dim_users
@@ -174,28 +195,33 @@ raw_to_staging
                             └─> refresh_churn_risk
 ```
 
-**Schedule:** Daily at 2:00 UTC
+### Layer Descriptions
 
-## 📊 Analytics & Dashboards
+**1. Raw Layer**
+- Immutable JSONB storage
+- Batch tracking and audit trail
+- No transformations applied
 
-### Metabase Dashboard: "Executive Overview"
+**2. Staging Layer**
+- Parsed and typed columns
+- Data validation and deduplication
+- Temporary storage for processing
 
-Access at http://localhost:3000 after connecting to PostgreSQL:
-- **Host:** `postgres` (Docker network)
-- **Port:** `5432`
-- **Database:** `saas_analytics`
-- **User:** `dataeng`
-- **Password:** (from `.env`)
+**3. Core Layer**
+- Star schema design
+- Slowly Changing Dimensions (SCD Type 2)
+- Optimized for analytical queries
 
-**Available Visualizations:**
-1. **Daily Active Users** - Line chart showing user engagement trends
-2. **User Retention Cohorts** - Cohort analysis table
-3. **Feature Adoption** - Bar chart of feature usage
-4. **Churn Risk Distribution** - Pie chart of user churn risk categories
+**4. Analytics Layer**
+- Pre-aggregated metrics
+- Materialized views for performance
+- Business-ready KPIs
 
-### Sample Queries
+---
 
-**Feature adoption:**
+## 📈 Sample Analytics Queries
+
+### Feature Adoption Analysis
 ```sql
 SELECT 
     feature_name,
@@ -206,100 +232,203 @@ FROM analytics.feature_adoption_funnel
 ORDER BY total_uses DESC;
 ```
 
-**Churn risk:**
+### Churn Risk Distribution
 ```sql
 SELECT 
     churn_risk_category,
-    COUNT(*) AS user_count
+    COUNT(*) AS user_count,
+    ROUND(100.0 * COUNT(*) / SUM(COUNT(*)) OVER (), 1) as percentage
 FROM analytics.churn_risk_scores
-WHERE last_active_date >= '2024-01-01'
-GROUP BY churn_risk_category;
+GROUP BY churn_risk_category
+ORDER BY churn_risk_category;
 ```
 
-## 🛠️ Development
-
-### Running SQL Transformations Manually
-
-```bash
-# Connect to PostgreSQL
-docker exec -it saas_postgres psql -U dataeng -d saas_analytics
-
-# Run transformation
-\i /opt/sql/transformations/raw_to_staging.sql
+### Daily Active Users Trend
+```sql
+SELECT 
+    activity_date,
+    COUNT(DISTINCT user_sk) as daily_active_users,
+    SUM(total_events) as total_events
+FROM core.fact_daily_user_activity
+WHERE activity_date >= CURRENT_DATE - INTERVAL '30 days'
+GROUP BY activity_date
+ORDER BY activity_date;
 ```
-
-### Refresh Materialized Views
-
-```bash
-docker exec saas_postgres psql -U dataeng -d saas_analytics -c "
-REFRESH MATERIALIZED VIEW analytics.user_retention_cohorts;
-REFRESH MATERIALIZED VIEW analytics.feature_adoption_funnel;
-REFRESH MATERIALIZED VIEW analytics.churn_risk_scores;
-"
-```
-
-### View Logs
-
-```bash
-# Airflow scheduler
-docker-compose logs -f airflow-scheduler
-
-# PostgreSQL
-docker-compose logs -f postgres
-```
-
-## 📈 Data Model
-
-### Dimensions
-- `core.dim_users` - 500 users with registration dates and subscription tiers
-- `core.dim_documents` - 2,000 documents with ownership and creation dates
-- `core.dim_features` - 8 product features (Templates, Comments, Export, etc.)
-- `core.dim_date` - Date dimension for time-based analysis
-
-### Facts
-- `core.fact_events` - 1.8M+ granular event records
-- `core.fact_daily_user_activity` - Aggregated daily user metrics
-
-### Analytics Views
-- `analytics.user_retention_cohorts` - Monthly cohort retention analysis
-- `analytics.feature_adoption_funnel` - Feature usage metrics
-- `analytics.churn_risk_scores` - User churn risk classification
-
-## 🧪 Testing
-
-```bash
-# Validate data quality
-docker exec saas_postgres psql -U dataeng -d saas_analytics -c "
-SELECT 'Raw Events' as layer, COUNT(*) as record_count FROM raw.events
-UNION ALL
-SELECT 'Staging Events', COUNT(*) FROM staging.events
-UNION ALL
-SELECT 'Core Events', COUNT(*) FROM core.fact_events;
-"
-```
-
-## 🚧 Production Considerations
-
-This is a **portfolio/learning project**. For production use, consider:
-
-- ✅ Use managed Airflow (AWS MWAA, Google Cloud Composer, Astronomer)
-- ✅ Implement `CeleryExecutor` with Redis/RabbitMQ for scalability
-- ✅ Store secrets in AWS Secrets Manager / HashiCorp Vault
-- ✅ Add monitoring (Datadog, Prometheus + Grafana)
-- ✅ Implement CI/CD (GitHub Actions → Docker Registry → ECS/K8s)
-- ✅ Use dbt for SQL transformations with version control
-- ✅ Add data quality tests (Great Expectations, dbt tests)
-- ✅ Implement incremental processing for large datasets
-- ✅ Set up alerting for pipeline failures
-
-## 📝 License
-
-MIT License - feel free to use this project for learning and portfolio purposes.
-
-## 🤝 Contributing
-
-This is a personal portfolio project, but suggestions and feedback are welcome! Open an issue or reach out.
 
 ---
 
-**Built with ❤️ as a data engineering portfolio project**
+## 🛠️ Manual Operations
+
+### Run Transformations Manually
+
+```bash
+# Raw → Staging
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/raw_to_staging.sql
+
+# Staging → Core
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/staging_to_core.sql
+
+# Refresh Analytics
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/refresh_analytics.sql
+```
+
+### Database Access
+
+```bash
+# PostgreSQL CLI
+docker exec -it saas_postgres psql -U dataeng -d saas_analytics
+
+# Check data volumes
+SELECT 'Raw' as layer, COUNT(*) FROM raw.events
+UNION ALL
+SELECT 'Staging', COUNT(*) FROM staging.events
+UNION ALL
+SELECT 'Core', COUNT(*) FROM core.fact_events;
+```
+
+---
+
+## 🧪 Data Quality & Validation
+
+### Event Processing Validation
+```sql
+WITH layer_counts AS (
+    SELECT 'Raw' as layer, COUNT(*) as cnt FROM raw.events
+    UNION ALL
+    SELECT 'Staging', COUNT(*) FROM staging.events
+    UNION ALL
+    SELECT 'Core', COUNT(*) FROM core.fact_events
+)
+SELECT 
+    layer,
+    cnt as record_count,
+    ROUND(100.0 * cnt / FIRST_VALUE(cnt) OVER (ORDER BY layer), 2) as pct_of_raw
+FROM layer_counts;
+```
+
+### Duplicate Detection
+```sql
+SELECT event_id, COUNT(*) 
+FROM staging.events 
+GROUP BY event_id 
+HAVING COUNT(*) > 1;
+```
+
+---
+
+## 🚧 Future Improvements
+
+### Scalability
+- [ ] Migrate to AWS RDS or Aurora PostgreSQL
+- [ ] Implement CeleryExecutor for distributed processing
+- [ ] Add table partitioning by date
+- [ ] Implement incremental processing with watermarks
+
+### Data Quality
+- [ ] Add Great Expectations for validation
+- [ ] Implement dbt for SQL transformations
+- [ ] Add schema evolution handling
+- [ ] Implement data lineage tracking
+
+### Monitoring
+- [ ] Set up Datadog/Prometheus metrics
+- [ ] Add Airflow SLA monitoring
+- [ ] Implement alerting for failures
+- [ ] Add query performance monitoring
+
+### Security
+- [ ] Move secrets to AWS Secrets Manager
+- [ ] Implement row-level security
+- [ ] Add audit logging
+- [ ] Enable SSL/TLS connections
+
+---
+
+## 📚 Learning Outcomes
+
+This project demonstrates:
+
+✅ **Data Engineering Fundamentals**
+- ETL/ELT pipeline design
+- Dimensional modeling (Star Schema)
+- Data quality and validation
+- Incremental vs. full refresh strategies
+
+✅ **Technical Skills**
+- Apache Airflow orchestration
+- PostgreSQL optimization
+- Docker containerization
+- SQL performance tuning
+- Python data generation
+
+✅ **Best Practices**
+- Version control with Git
+- Comprehensive documentation
+- Modular code structure
+- Environment configuration management
+
+---
+
+## 🐛 Troubleshooting
+
+### Airflow DAG not running
+```bash
+# Check scheduler logs
+docker-compose logs airflow-scheduler
+
+# Unpause DAG
+docker exec saas_airflow_webserver airflow dags unpause saas_analytics_pipeline
+```
+
+### Slow queries
+```bash
+# Check active queries
+docker exec saas_postgres psql -U dataeng -d saas_analytics -c "
+SELECT pid, state, query_start, LEFT(query, 100) 
+FROM pg_stat_activity 
+WHERE state = 'active';
+"
+```
+
+### Out of disk space
+```bash
+# Check Docker volumes
+docker system df
+
+# Prune old data
+docker system prune -a
+```
+
+---
+
+## 📊 Key Metrics
+
+| Metric | Value |
+|--------|-------|
+| **Total Events** | 11,462,242 |
+| **Date Range** | Jan 1, 2024 - Jan 8, 2026 |
+| **Total Users** | 2,500 |
+| **Total Documents** | 4,000 |
+| **Features Tracked** | 8 |
+| **Daily Aggregations** | 673,422 |
+| **Active Users** | 1,000 (40%) |
+| **High Churn Risk** | 1,500 (60%) |
+
+---
+
+## 📞 Contact
+
+**Developer:** Vladislav Laboga  
+**GitHub:** [@vlabogac-png](https://github.com/vlabogac-png)  
+**Project Repository:** [saas-analytics-pipeline](https://github.com/vlabogac-png/saas-analytics-pipeline)
+
+---
+
+## 📄 License
+
+This project is open source and available under the MIT License.
+
+---
+
+**Last Updated:** January 8, 2026  
+**Status:** ✅ Complete & Production-Ready
