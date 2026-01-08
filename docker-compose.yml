@@ -94,6 +94,24 @@ services:
       - saas_network
     restart: unless-stopped
 
+  metabase:
+      image: metabase/metabase:latest
+      container_name: saas_metabase
+      environment:
+        MB_DB_TYPE: postgres
+        MB_DB_DBNAME: metabase
+        MB_DB_PORT: 5432
+        MB_DB_USER: dataeng
+        MB_DB_PASS: secure_password_123
+        MB_DB_HOST: postgres
+      ports:
+        - "3000:3000"
+      depends_on:
+        - postgres
+      networks:
+        - saas_network
+      restart: unless-stopped
+
 volumes:
   postgres_data:
   airflow_logs:
@@ -101,3 +119,5 @@ volumes:
 networks:
   saas_network:
     driver: bridge
+
+  
