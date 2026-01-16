@@ -106,15 +106,21 @@ docker-compose up -d
 # 4. Wait for initialization (~2 minutes)
 docker-compose logs -f airflow-init
 
-# 5. Access the UIs
+# 5. Initialize database schemas (REQUIRED on first run)
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/01_raw_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/02_staging_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/03_core_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/04_analytics_layer.sql
+
+# 6. Access the UIs
 # Airflow: http://localhost:8080 (admin/admin)
 # Metabase: http://localhost:3000
 # pgAdmin: http://localhost:5050
 ```
 
-### Generate Sample Data (Optional)
+### Generate Sample Data
 
-Data is already included, but you can regenerate:
+**Note:** Database schemas must be initialized (step 5 above) before generating data.
 
 ```bash
 # Create virtual environment
@@ -371,6 +377,63 @@ This project demonstrates:
 
 ## 🐛 Troubleshooting
 
+### Starting from Scratch (Reset Everything)
+
+If you need to completely reset the project and start over:
+
+```bash
+# 1. Stop and remove all containers and volumes
+docker-compose down -v
+
+# 2. Start services again
+docker-compose up -d
+
+# 3. Wait for initialization (~2 minutes)
+docker-compose logs -f airflow-init
+
+# 4. Initialize database schemas (in order!)
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/01_raw_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/02_staging_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/03_core_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/04_analytics_layer.sql
+
+# 5. Generate events
+python generate_current_events.py
+
+# 6. Run ETL transformations
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/raw_to_staging.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/staging_to_core.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/refresh_analytics.sql
+```
+
+### "Table does not exist" errors
+
+If you see errors like `relation "raw.events" does not exist`:
+
+```bash
+# Run the DDL files to create the schemas and tables
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/01_raw_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/02_staging_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/03_core_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/04_analytics_layer.sql
+```
+
+### Airflow login issues
+
+If you can't login to Airflow with admin/admin:
+
+```bash
+# Recreate the admin user
+docker exec saas_airflow_webserver airflow users delete --username admin
+docker exec saas_airflow_webserver airflow users create \
+    --username admin \
+    --password admin \
+    --firstname Admin \
+    --lastname User \
+    --role Admin \
+    --email admin@example.com
+```
+
 ### Airflow DAG not running
 ```bash
 # Check scheduler logs
@@ -384,8 +447,8 @@ docker exec saas_airflow_webserver airflow dags unpause saas_analytics_pipeline
 ```bash
 # Check active queries
 docker exec saas_postgres psql -U dataeng -d saas_analytics -c "
-SELECT pid, state, query_start, LEFT(query, 100) 
-FROM pg_stat_activity 
+SELECT pid, state, query_start, LEFT(query, 100)
+FROM pg_stat_activity
 WHERE state = 'active';
 "
 ```
