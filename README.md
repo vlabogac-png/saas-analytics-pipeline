@@ -112,7 +112,16 @@ docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/02_stag
 docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/03_core_layer.sql
 docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/04_analytics_layer.sql
 
-# 6. Access the UIs
+# 6. Configure Airflow database connection (REQUIRED for DAG execution)
+docker exec saas_airflow_webserver airflow connections add 'postgres_saas' \
+    --conn-type 'postgres' \
+    --conn-host 'postgres' \
+    --conn-schema 'saas_analytics' \
+    --conn-login 'dataeng' \
+    --conn-password 'secure_password_123' \
+    --conn-port '5432'
+
+# 7. Access the UIs
 # Airflow: http://localhost:8080 (admin/admin)
 # Metabase: http://localhost:3000
 # pgAdmin: http://localhost:5050
@@ -397,10 +406,19 @@ docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/02_stag
 docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/03_core_layer.sql
 docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/04_analytics_layer.sql
 
-# 5. Generate events
+# 5. Configure Airflow connection
+docker exec saas_airflow_webserver airflow connections add 'postgres_saas' \
+    --conn-type 'postgres' \
+    --conn-host 'postgres' \
+    --conn-schema 'saas_analytics' \
+    --conn-login 'dataeng' \
+    --conn-password 'secure_password_123' \
+    --conn-port '5432'
+
+# 6. Generate events
 python generate_current_events.py
 
-# 6. Run ETL transformations
+# 7. Run ETL transformations (or use Airflow DAG)
 docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/raw_to_staging.sql
 docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/staging_to_core.sql
 docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/refresh_analytics.sql
@@ -434,6 +452,26 @@ docker exec saas_airflow_webserver airflow users create \
     --email admin@example.com
 ```
 
+### Airflow connection errors
+
+If you see `The conn_id 'postgres_saas' isn't defined`:
+
+```bash
+# Create the Airflow database connection
+docker exec saas_airflow_webserver airflow connections add 'postgres_saas' \
+    --conn-type 'postgres' \
+    --conn-host 'postgres' \
+    --conn-schema 'saas_analytics' \
+    --conn-login 'dataeng' \
+    --conn-password 'secure_password_123' \
+    --conn-port '5432'
+
+# Or create it via the Airflow UI:
+# 1. Go to Admin → Connections
+# 2. Click "+" to add new connection
+# 3. Fill in the details above
+```
+
 ### Airflow DAG not running
 ```bash
 # Check scheduler logs
@@ -441,6 +479,9 @@ docker-compose logs airflow-scheduler
 
 # Unpause DAG
 docker exec saas_airflow_webserver airflow dags unpause saas_analytics_pipeline
+
+# Trigger DAG manually
+docker exec saas_airflow_webserver airflow dags trigger saas_analytics_pipeline
 ```
 
 ### Slow queries
