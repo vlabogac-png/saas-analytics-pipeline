@@ -49,5 +49,5 @@ while current <= end_date:
     
     current += timedelta(days=1)
 
-print(f'\n✅ Total: {total_loaded:,} events über {day_count} Tage')
-print(f'📊 Durchschnitt: {total_loaded // day_count:,} events/Tag')
+print(f'\n Total: {total_loaded:,} events über {day_count} Tage')
+print(f' Durchschnitt: {total_loaded // day_count:,} events/Tag')
