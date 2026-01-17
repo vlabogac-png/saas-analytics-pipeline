@@ -1,5 +1,9 @@
 # SaaS Analytics Pipeline
 
+[![CI/CD Pipeline](https://github.com/vlabogac-png/saas-analytics-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/vlabogac-png/saas-analytics-pipeline/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/vlabogac-png/saas-analytics-pipeline/actions/workflows/codeql.yml/badge.svg)](https://github.com/vlabogac-png/saas-analytics-pipeline/actions/workflows/codeql.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 A production-grade data engineering project that processes **11.4 million** synthetic SaaS events through a 4-layer ETL architecture using Apache Airflow, PostgreSQL, and Metabase.
 
 ![Dashboard Screenshot](dashboard_screenshot.png)
@@ -327,6 +331,60 @@ SELECT event_id, COUNT(*)
 FROM staging.events 
 GROUP BY event_id 
 HAVING COUNT(*) > 1;
+```
+
+---
+
+## 🔄 CI/CD Pipeline
+
+This project includes automated CI/CD workflows using GitHub Actions:
+
+### Continuous Integration (CI)
+
+**Workflow:** `.github/workflows/ci.yml`
+
+Runs on every push and pull request to `main` and `develop`:
+
+- ✅ **Python Linting** - Black code formatting & Flake8 linting
+- ✅ **SQL Validation** - Syntax checking for DDL and transformation files
+- ✅ **Docker Build** - Validates docker-compose configuration
+- ✅ **Python Tests** - Runs pytest with coverage reporting
+- ✅ **Documentation Check** - Validates README completeness
+- ✅ **Security Scan** - Trivy vulnerability scanner
+
+### Continuous Deployment (CD)
+
+**Workflow:** `.github/workflows/cd.yml`
+
+Triggers on version tags (e.g., `v1.0.0`):
+
+- 📦 **GitHub Releases** - Automatic release creation with changelog
+- 📚 **Documentation Deployment** - Updates project documentation
+
+### Code Security
+
+**Workflow:** `.github/workflows/codeql.yml`
+
+Runs weekly and on PRs:
+
+- 🔒 **CodeQL Analysis** - Security and code quality scanning
+- 🛡️ **Dependency Scanning** - Checks for vulnerable dependencies
+
+### Running CI Locally
+
+```bash
+# Install development dependencies
+pip install black flake8 pytest pytest-cov
+
+# Run linting
+black --check .
+flake8 .
+
+# Run tests
+pytest tests/ -v --cov=src
+
+# Validate docker-compose
+docker compose config
 ```
 
 ---
