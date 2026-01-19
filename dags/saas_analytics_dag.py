@@ -9,26 +9,26 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.postgres.operators.postgres import PostgresOperator
 
 default_args = {
-    'owner': 'data-engineering',
-    'depends_on_past': False,
-    'retries': 2,
-    'retry_delay': timedelta(minutes=5),
+    "owner": "data-engineering",
+    "depends_on_past": False,
+    "retries": 2,
+    "retry_delay": timedelta(minutes=5),
 }
 
 dag = DAG(
-    'saas_analytics_pipeline',
+    "saas_analytics_pipeline",
     default_args=default_args,
-    description='Daily SaaS analytics ETL pipeline',
-    schedule_interval='0 2 * * *',
+    description="Daily SaaS analytics ETL pipeline",
+    schedule_interval="0 2 * * *",
     start_date=datetime(2024, 1, 1),
     catchup=False,
-    tags=['saas', 'analytics', 'etl'],
+    tags=["saas", "analytics", "etl"],
 )
 
 # Task 1: Raw to Staging
 raw_to_staging = PostgresOperator(
-    task_id='raw_to_staging',
-    postgres_conn_id='postgres_saas',
+    task_id="raw_to_staging",
+    postgres_conn_id="postgres_saas",
     sql="""
         INSERT INTO staging.events (
             event_id, event_type, event_timestamp, user_id, session_id,
@@ -64,8 +64,8 @@ raw_to_staging = PostgresOperator(
 
 # Task 2: Load Dimensions
 load_dim_users = PostgresOperator(
-    task_id='load_dim_users',
-    postgres_conn_id='postgres_saas',
+    task_id="load_dim_users",
+    postgres_conn_id="postgres_saas",
     sql="""
         INSERT INTO core.dim_users (user_id, email, signup_date, current_plan, account_status)
         SELECT DISTINCT
@@ -82,8 +82,8 @@ load_dim_users = PostgresOperator(
 )
 
 load_dim_documents = PostgresOperator(
-    task_id='load_dim_documents',
-    postgres_conn_id='postgres_saas',
+    task_id="load_dim_documents",
+    postgres_conn_id="postgres_saas",
     sql="""
         INSERT INTO core.dim_documents (document_id, title, owner_user_id, created_at)
         SELECT DISTINCT
@@ -101,8 +101,8 @@ load_dim_documents = PostgresOperator(
 
 # Task 3: Load Fact Events
 load_fact_events = PostgresOperator(
-    task_id='load_fact_events',
-    postgres_conn_id='postgres_saas',
+    task_id="load_fact_events",
+    postgres_conn_id="postgres_saas",
     sql="""
         INSERT INTO core.fact_events (
             event_id, user_sk, document_sk, feature_sk, date_key,
@@ -126,8 +126,8 @@ load_fact_events = PostgresOperator(
 
 # Task 4: Load Daily Aggregation
 load_daily_activity = PostgresOperator(
-    task_id='load_daily_activity',
-    postgres_conn_id='postgres_saas',
+    task_id="load_daily_activity",
+    postgres_conn_id="postgres_saas",
     sql="""
         INSERT INTO core.fact_daily_user_activity (
             activity_date, user_sk, total_events, login_count,
@@ -156,22 +156,22 @@ load_daily_activity = PostgresOperator(
 
 # Task 5: Refresh Analytics Views
 refresh_retention = PostgresOperator(
-    task_id='refresh_retention_cohorts',
-    postgres_conn_id='postgres_saas',
+    task_id="refresh_retention_cohorts",
+    postgres_conn_id="postgres_saas",
     sql="REFRESH MATERIALIZED VIEW analytics.user_retention_cohorts;",
     dag=dag,
 )
 
 refresh_funnel = PostgresOperator(
-    task_id='refresh_feature_funnel',
-    postgres_conn_id='postgres_saas',
+    task_id="refresh_feature_funnel",
+    postgres_conn_id="postgres_saas",
     sql="REFRESH MATERIALIZED VIEW analytics.feature_adoption_funnel;",
     dag=dag,
 )
 
 refresh_churn = PostgresOperator(
-    task_id='refresh_churn_scores',
-    postgres_conn_id='postgres_saas',
+    task_id="refresh_churn_scores",
+    postgres_conn_id="postgres_saas",
     sql="REFRESH MATERIALIZED VIEW analytics.churn_risk_scores;",
     dag=dag,
 )
