@@ -25,7 +25,7 @@ dag = DAG(
     tags=["saas", "analytics", "etl"],
 )
 
-# Task 1: Raw to Staging
+# Task 1: Raw → Staging (JSONB → typed columns)
 raw_to_staging = PostgresOperator(
     task_id="raw_to_staging",
     postgres_conn_id="postgres_saas",
@@ -62,7 +62,7 @@ raw_to_staging = PostgresOperator(
     dag=dag,
 )
 
-# Task 2: Load Dimensions
+# Task 2: Load dimensions (users/documents)
 load_dim_users = PostgresOperator(
     task_id="load_dim_users",
     postgres_conn_id="postgres_saas",
@@ -99,7 +99,7 @@ load_dim_documents = PostgresOperator(
     dag=dag,
 )
 
-# Task 3: Load Fact Events
+# Task 3: Load fact table with surrogate keys
 load_fact_events = PostgresOperator(
     task_id="load_fact_events",
     postgres_conn_id="postgres_saas",
@@ -124,7 +124,7 @@ load_fact_events = PostgresOperator(
     dag=dag,
 )
 
-# Task 4: Load Daily Aggregation
+# Task 4: Daily aggregation (user-day)
 load_daily_activity = PostgresOperator(
     task_id="load_daily_activity",
     postgres_conn_id="postgres_saas",
@@ -154,7 +154,7 @@ load_daily_activity = PostgresOperator(
     dag=dag,
 )
 
-# Task 5: Refresh Analytics Views
+# Task 5: Refresh analytics views
 refresh_retention = PostgresOperator(
     task_id="refresh_retention_cohorts",
     postgres_conn_id="postgres_saas",

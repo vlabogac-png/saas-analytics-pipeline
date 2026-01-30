@@ -1,11 +1,13 @@
 import sys
 
+# Generates historical events (2024-01 → 2024-06) with growth + weekend reduction
+# Loads directly into raw.events (for full history)
 sys.path.append("src")
 from ingestion.event_generator import EventGenerator, load_to_raw
 from datetime import datetime, timedelta
 import random
 
-# DB Config
+# DB config
 db_config = {
     "host": "localhost",
     "port": 5432,
@@ -26,22 +28,22 @@ day_count = 0
 while current <= end_date:
     day_count += 1
 
-    # Base events (wächst über Zeit)
-    base_events = 8000 + (day_count * 10)  # Von 8k auf ~10k
+    # Base events (grows over time)
+    base_events = 8000 + (day_count * 10)  # From 8k to ~10k
 
-    # Wochenend-Reduktion (Samstag/Sonntag = 60% weniger)
-    if current.weekday() in [5, 6]:  # Samstag=5, Sonntag=6
+    # Weekend reduction (Saturday/Sunday = 60% fewer)
+    if current.weekday() in [5, 6]:  # Saturday=5, Sunday=6
         base_events = int(base_events * 0.4)
 
-    # Zufällige Schwankung ±15%
+    # Random variation ±15%
     variation = random.uniform(0.85, 1.15)
     events_today = int(base_events * variation)
 
-    # Events generieren
+    # Generate events
     batch_id = f'batch_{current.strftime("%Y%m%d")}'
     events = list(generator.generate_day(current, events_today))
 
-    # Laden
+    # Load
     loaded = load_to_raw(events, batch_id, db_config)
     total_loaded += loaded
 
@@ -50,5 +52,5 @@ while current <= end_date:
 
     current += timedelta(days=1)
 
-print(f"\n Total: {total_loaded:,} events über {day_count} Tage")
-print(f" Durchschnitt: {total_loaded // day_count:,} events/Tag")
+print(f"\n Total: {total_loaded:,} events over {day_count} days")
+print(f" Average: {total_loaded // day_count:,} events/day")

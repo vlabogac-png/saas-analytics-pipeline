@@ -1,5 +1,5 @@
 services:
-  postgres:
+  postgres:     # Data warehouse
     image: postgres:15
     container_name: saas_postgres
     environment:
@@ -19,7 +19,7 @@ services:
       - saas_network
     restart: unless-stopped
 
-  pgadmin:
+  pgadmin:      # Optional DB UI
     image: dpage/pgadmin4:latest
     container_name: saas_pgadmin
     environment:
@@ -33,7 +33,7 @@ services:
       - saas_network
     restart: unless-stopped
 
-  airflow-init:
+  airflow-init: # Init DB + admin user
     image: apache/airflow:2.8.1-python3.11
     container_name: saas_airflow_init
     environment:
@@ -51,7 +51,7 @@ services:
     networks:
       - saas_network
 
-  airflow-webserver:
+  airflow-webserver: # Airflow UI
     image: apache/airflow:2.8.1-python3.11
     container_name: saas_airflow_webserver
     environment:
@@ -73,7 +73,7 @@ services:
       - saas_network
     restart: unless-stopped
 
-  airflow-scheduler:
+  airflow-scheduler: # DAG scheduler
     image: apache/airflow:2.8.1-python3.11
     container_name: saas_airflow_scheduler
     environment:
@@ -94,7 +94,7 @@ services:
       - saas_network
     restart: unless-stopped
 
-  metabase:
+  metabase:     # BI dashboard
       image: metabase/metabase:latest
       container_name: saas_metabase
       environment:

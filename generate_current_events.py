@@ -1,5 +1,7 @@
 import sys
 
+# Generates recent events (2024-07 → 2026-01) with growth + weekend reduction
+# Loads directly into raw.events (for demo / dashboard)
 sys.path.append("src")
 from ingestion.event_generator import EventGenerator, load_to_raw
 from datetime import datetime, timedelta
@@ -15,7 +17,7 @@ db_config = {
 
 generator = EventGenerator(seed=42)
 
-# Von Juli 2024 bis Januar 2026
+# From July 2024 to January 2026
 start_date = datetime(2024, 7, 1)
 end_date = datetime(2026, 1, 8)
 
@@ -26,28 +28,28 @@ day_count = 0
 while current <= end_date:
     day_count += 1
 
-    # Base events (wächst über Zeit)
+    # Base events (grows over time)
     base_events = 9000 + (day_count * 5)
 
-    # Wochenend-Reduktion
+    # Weekend reduction
     if current.weekday() in [5, 6]:
         base_events = int(base_events * 0.4)
 
-    # Zufällige Schwankung
+    # Random variation
     variation = random.uniform(0.85, 1.15)
     events_today = int(base_events * variation)
 
-    # Events generieren
+    # Generate events
     batch_id = f'batch_{current.strftime("%Y%m%d")}'
     events = list(generator.generate_day(current, events_today))
 
-    # Laden
+    # Load
     loaded = load_to_raw(events, batch_id, db_config)
     total_loaded += loaded
 
-    if day_count % 30 == 0:  # Nur jeden 30. Tag ausgeben
+    if day_count % 30 == 0:  # Print every 30th day only
         print(f"{current.date()}: {loaded:,} events (Total: {total_loaded:,})")
 
     current += timedelta(days=1)
 
-print(f"\n✅ Total: {total_loaded:,} events über {day_count} Tage")
+print(f"\n✅ Total: {total_loaded:,} events over {day_count} days")
