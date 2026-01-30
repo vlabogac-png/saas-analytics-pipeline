@@ -60,10 +60,9 @@ services:
       - AIRFLOW__WEBSERVER__SECRET_KEY=super-secret-key-12345
       - AIRFLOW__CORE__LOAD_EXAMPLES=false
     volumes:
-      - ./dags:/opt/airflow/dags
+      - ./airflow/dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
-      - ./sql:/opt/airflow/sql
-      - airflow_logs:/opt/airflow/logs
+      - ./airflow/sql:/opt/airflow/sql
     ports:
       - "8080:8080"
     depends_on:
@@ -82,9 +81,9 @@ services:
       - AIRFLOW__CORE__FERNET_KEY=zTvhzzia4bPqTDFdvhessP-bHuObXE6MvnMswLkLnHg=
       - AIRFLOW__CORE__LOAD_EXAMPLES=false
     volumes:
-      - ./dags:/opt/airflow/dags
+      - ./airflow/dags:/opt/airflow/dags
       - ./src:/opt/airflow/src
-      - ./sql:/opt/airflow/sql
+      - ./airflow/sql:/opt/airflow/sql
       - airflow_logs:/opt/airflow/logs
     depends_on:
       airflow-init:
