@@ -184,8 +184,7 @@ class EventGenerator:
                     "document_id": f"doc_{uuid.uuid4().hex[:12]}",
                     "owner_user_id": owner["user_id"],
                     "title": f"Document {i}",
-                    "created_at": owner["signup_date"]
-                    + timedelta(days=random.randint(0, 30)),
+                    "created_at": owner["signup_date"] + timedelta(days=random.randint(0, 30)),
                 }
             )
         return documents
@@ -221,9 +220,7 @@ class EventGenerator:
             dict: Event dictionary with all required fields for the pipeline
         """
         # Select event type based on weighted distribution
-        event_type = random.choices(
-            list(EVENT_WEIGHTS.keys()), weights=list(EVENT_WEIGHTS.values())
-        )[0]
+        event_type = random.choices(list(EVENT_WEIGHTS.keys()), weights=list(EVENT_WEIGHTS.values()))[0]
 
         # Select random user from pool
         user = random.choice(self.users)
@@ -306,9 +303,7 @@ class EventGenerator:
             feature = random.choice(FEATURES)
             event["properties"]["feature_id"] = feature["id"]
             event["properties"]["feature_name"] = feature["name"]
-            event["properties"]["duration_sec"] = random.randint(
-                5, 300
-            )  # 5 seconds to 5 minutes
+            event["properties"]["duration_sec"] = random.randint(5, 300)  # 5 seconds to 5 minutes
 
         elif event_type in ["subscription_started", "subscription_upgraded"]:
             # Subscription lifecycle events
@@ -317,15 +312,11 @@ class EventGenerator:
 
         elif event_type == "subscription_cancelled":
             # User cancellation events with reason
-            event["properties"]["reason"] = random.choice(
-                ["too_expensive", "not_using", "competitor", "other"]
-            )
+            event["properties"]["reason"] = random.choice(["too_expensive", "not_using", "competitor", "other"])
 
         return event
 
-    def generate_day(
-        self, event_date: datetime, num_events: int = EVENTS_PER_DAY
-    ) -> Generator[dict, None, None]:
+    def generate_day(self, event_date: datetime, num_events: int = EVENTS_PER_DAY) -> Generator[dict, None, None]:
         """
         Generate all events for a single day using a generator.
 
@@ -402,9 +393,7 @@ def main():
     import argparse
 
     # Setup argument parser
-    parser = argparse.ArgumentParser(
-        description="Generate synthetic SaaS analytics events for testing the pipeline"
-    )
+    parser = argparse.ArgumentParser(description="Generate synthetic SaaS analytics events for testing the pipeline")
     parser.add_argument(
         "--start-date",
         type=str,
