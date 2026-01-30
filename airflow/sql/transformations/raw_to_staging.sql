@@ -1,10 +1,46 @@
--- Transformation: raw.events → staging.events (Idempotent)
+-- ================================================
+-- Transformation: Raw Layer → Staging Layer
+-- ================================================
+--
+-- Purpose: Transform raw JSONB events into typed, validated staging tables
+--
+-- Logic:
+--   1. Extract event_id from raw_payload
+--   2. Parse JSONB fields into typed columns
+--   3. Handle null values with COALESCE (use fallback values)
+--   4. Extract nested properties (document_id, feature_id, etc.)
+--   5. Filter out duplicates using event_id existence check
+--   6. Idempotent: Can run multiple times without errors
+--
+-- Why Idempotent?
+--   Allows re-running transformations when new raw data is loaded
+--   without duplicate entries in staging table
+--
+-- Performance:
+--   - Uses JSONB extraction operators for fast parsing
+--   - COALESCE handles missing fields gracefully
+--   - Subquery check ensures no duplicates
+-- ================================================
+
+-- Transform raw JSONB events into staging events with typed columns
+-- This extracts event details and properties from the JSONB payload
 INSERT INTO staging.events (
-    event_id, event_type, event_timestamp, user_id, session_id,
-    document_id, feature_id, duration_seconds, characters_added,
-    platform, user_agent, ip_address, properties, batch_id
+    event_id,
+    event_type,
+    event_timestamp,
+    user_id,
+    session_id,
+    document_id,
+    feature_id,
+    duration_seconds,
+    characters_added,
+    platform,
+    user_agent,
+    ip_address,
+    properties,
+    batch_id
 )
-SELECT 
+SELECT
     raw_payload->>'event_id',
     raw_payload->>'event_type',
     (raw_payload->>'event_timestamp')::TIMESTAMP,
@@ -24,6 +60,6 @@ SELECT
     batch_id
 FROM raw.events r
 WHERE NOT EXISTS (
-    SELECT 1 FROM staging.events s 
+    SELECT 1 FROM staging.events s
     WHERE s.event_id = r.raw_payload->>'event_id'
 );

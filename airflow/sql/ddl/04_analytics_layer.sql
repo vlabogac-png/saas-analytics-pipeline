@@ -1,12 +1,51 @@
 -- ================================================
 -- ANALYTICS LAYER: Materialized Views for BI
 -- ================================================
+--
+-- Purpose:
+--   This layer provides pre-aggregated, business-ready metrics for
+--   BI tools like Metabase. Materialized views cache complex queries
+--   for fast repeated access.
+--
+-- Characteristics:
+--   - Pre-aggregated: Reduces query complexity
+--   - Cached: Improves query performance
+--   - Refreshable: Can be updated via REFRESH MATERIALIZED VIEW
+--
+-- Views:
+--   - user_retention_cohorts: Monthly user retention analysis
+--   - feature_adoption_funnel: Feature usage metrics
+--   - churn_risk_scores: User churn risk classification
+--
+-- Refresh Strategy:
+--   These views are refreshed daily by the Airflow DAG to ensure
+--   metrics stay current with new event data.
+--
+-- Benefits:
+--   - Fast BI queries
+--   - Consistent metrics
+--   - Pre-computed aggregations
+-- ================================================
 
--- Create schema
+-- Create analytics schema if it doesn't exist
 CREATE SCHEMA IF NOT EXISTS analytics;
 
 -- ================================================
 -- MATERIALIZED VIEW: User Retention Cohorts
+-- ================================================
+--
+-- Purpose: Analyze user retention over time by signup cohort
+--
+-- Logic:
+--   1. Group users by signup month (cohort)
+--   2. Track which users are active in each subsequent month
+--   3. Calculate retention rate: retained users / total cohort size
+--   4. Track months since signup
+--
+-- Example Result:
+--   Cohort Jan 2024 | Active in Feb | Active in Mar | ... | Retention %
+--   --------------------------------------------|----------------
+--   Cohort of 1000  | 800            | 650           | ... | 65%
 -- ================================================
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS analytics.user_retention_cohorts AS
@@ -42,6 +81,18 @@ ON analytics.user_retention_cohorts(cohort_month, activity_month);
 -- ================================================
 -- MATERIALIZED VIEW: Feature Adoption Funnel
 -- ================================================
+--
+-- Purpose: Track feature usage metrics and engagement
+--
+-- Metrics:
+--   - unique_users: How many different users used each feature
+--   - total_uses: Total number of feature access events
+--   - avg_duration_seconds: Average time spent using the feature
+--   - first_used_at: When the feature was first used (by any user)
+--   - last_used_at: When the feature was last used
+--
+-- Use Case: Identify most-used features and engagement patterns
+-- ================================================
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS analytics.feature_adoption_funnel AS
 SELECT
@@ -64,6 +115,22 @@ ON analytics.feature_adoption_funnel(feature_name);
 
 -- ================================================
 -- MATERIALIZED VIEW: Churn Risk Scores
+-- ================================================
+--
+-- Purpose: Classify users by their churn risk level
+--
+-- Risk Calculation:
+--   - active: User logged in within 7 days
+--   - low: User logged in within 14 days
+--   - medium: User logged in within 30 days
+--   - high: User logged in more than 30 days ago
+--
+-- Fields:
+--   - user_sk, user_id, current_plan
+--   - last_active_date: Most recent activity
+--   - days_since_last_activity: Time since last login
+--   - lifetime_events: Total events user has generated
+--   - churn_risk_category: Risk classification
 -- ================================================
 
 CREATE MATERIALIZED VIEW IF NOT EXISTS analytics.churn_risk_scores AS
@@ -98,10 +165,10 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_churn_risk_user
 ON analytics.churn_risk_scores(user_sk);
 
 -- ================================================
--- COMMENTS
+-- VIEW COMMENTS
 -- ================================================
 
 COMMENT ON SCHEMA analytics IS 'Analytics layer: pre-aggregated materialized views for BI tools';
-COMMENT ON MATERIALIZED VIEW analytics.user_retention_cohorts IS 'Monthly cohort retention analysis';
-COMMENT ON MATERIALIZED VIEW analytics.feature_adoption_funnel IS 'Feature usage metrics and engagement';
-COMMENT ON MATERIALIZED VIEW analytics.churn_risk_scores IS 'User churn risk classification based on activity';
+COMMENT ON MATERIALIZED VIEW analytics.user_retention_cohorts IS 'Monthly cohort retention analysis showing how users retain over time';
+COMMENT ON MATERIALIZED VIEW analytics.feature_adoption_funnel IS 'Feature usage metrics, unique users, and engagement patterns';
+COMMENT ON MATERIALIZED VIEW analytics.churn_risk_scores IS 'User churn risk classification based on activity frequency';
