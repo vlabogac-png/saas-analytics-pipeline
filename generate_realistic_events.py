@@ -1,6 +1,6 @@
 import sys
 
-# Generates historical events (2024-01 → 2024-06) with growth + weekend reduction
+# Generates historical events (2024-01 → 2025-12) with growth + weekend reduction
 # Loads directly into raw.events (for full history)
 sys.path.append("src")
 from ingestion.event_generator import EventGenerator, load_to_raw
@@ -19,7 +19,7 @@ db_config = {
 generator = EventGenerator(seed=42)
 
 start_date = datetime(2024, 1, 1)
-end_date = datetime(2024, 6, 30)
+end_date = datetime(2025, 12, 31)
 
 current = start_date
 total_loaded = 0

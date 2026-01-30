@@ -26,8 +26,8 @@ from psycopg2.extras import execute_values
 # ================================================
 
 # Configuration
-NUM_USERS = 500
-NUM_DOCUMENTS = 2000
+NUM_USERS = 2500
+NUM_DOCUMENTS = 4000
 EVENTS_PER_DAY = 10000
 
 # Event type weights (realistic distribution based on typical SaaS behavior)

@@ -4,7 +4,7 @@
 [![CodeQL](https://github.com/vlabogac-png/saas-analytics-pipeline/actions/workflows/codeql.yml/badge.svg)](https://github.com/vlabogac-png/saas-analytics-pipeline/actions/workflows/codeql.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A production-grade data engineering project that processes **11.4 million** synthetic SaaS events through a 4-layer ETL architecture using Apache Airflow, PostgreSQL, and Metabase.
+A production-grade data engineering project that processes **~7.29 million** synthetic SaaS events through a 4-layer ETL architecture using Apache Airflow, PostgreSQL, and Metabase.
 
 ![Dashboard Screenshot](dashboard_screenshot.png)
 
@@ -13,7 +13,7 @@ A production-grade data engineering project that processes **11.4 million** synt
 This project demonstrates end-to-end data engineering skills by building a complete analytics pipeline for a fictional SaaS product. The pipeline processes user events, transforms them through multiple layers, and provides actionable insights through interactive dashboards.
 
 **Key Highlights:**
--  **11.4M events** processed (Jan 2024 - Jan 2026)
+-  **~7.29M events** processed (Jan 2024 - Dec 2025 + rolling last 30 days)
 -  **4-layer architecture**: Raw → Staging → Core → Analytics
 -  **Automated orchestration** with Apache Airflow
 -  **Interactive dashboards** in Metabase
@@ -25,7 +25,7 @@ This project demonstrates end-to-end data engineering skills by building a compl
 
 The **Executive Overview** dashboard provides real-time insights:
 
-- **Total Users**: 6,000 registered users
+- **Total Users**: 2,500 registered users
 - **Daily Active Users**: Trend analysis showing engagement patterns
 - **User Retention Cohorts**: 100% retention for 2024-01 cohort over 3 months
 - **Feature Adoption**: Export to PDF leads with 300k+ uses
@@ -76,8 +76,8 @@ Metabase Dashboard (BI visualization)
 - `dim_date` (2,555 days) - Date dimension (2020-2026)
 
 **Facts:**
-- `fact_events` (11.4M rows) - Granular event-level data
-- `fact_daily_user_activity` (673k rows) - Daily aggregations
+- `fact_events` (~7.29M rows) - Granular event-level data
+- `fact_daily_user_activity` (~365k rows) - Daily aggregations
 
 ### Analytics Layer (Materialized Views)
 
@@ -143,8 +143,11 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Generate events (Jan 2024 - Jan 2026)
+# Generate last 30 days of events
 python generate_current_events.py
+
+# Generate historical events (Jan 2024 - Dec 2025)
+python generate_realistic_events.py
 ```
 
 **Important:** The DAG imports event generation modules from `src/`, which is mounted to `/opt/airflow/src` in the Airflow containers. The scripts run locally using the same imports.
@@ -538,12 +541,12 @@ docker system prune -a
 
 | Metric | Value |
 |--------|-------|
-| **Total Events** | 11,462,242 |
-| **Date Range** | Jan 1, 2024 - Jan 8, 2026 |
+| **Total Events** | ~7,286,000 |
+| **Date Range** | Jan 1, 2024 - Dec 31, 2025 + rolling last 30 days |
 | **Total Users** | 2,500 |
 | **Total Documents** | 4,000 |
 | **Features Tracked** | 8 |
-| **Daily Aggregations** | 673,422 |
+| **Daily Aggregations** | ~365,000 |
 | **Active Users** | 1,000 (40%) |
 | **High Churn Risk** | 1,500 (60%) |
 

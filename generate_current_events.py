@@ -1,6 +1,6 @@
 import sys
 
-# Generates recent events (2024-07 → 2026-01) with growth + weekend reduction
+# Generates recent events for the last month with growth + weekend reduction
 # Loads directly into raw.events (for demo / dashboard)
 sys.path.append("src")
 from ingestion.event_generator import EventGenerator, load_to_raw
@@ -17,11 +17,12 @@ db_config = {
 
 generator = EventGenerator(seed=42)
 
-# From July 2024 to January 2026
-start_date = datetime(2024, 7, 1)
-end_date = datetime(2026, 1, 8)
+# Last 30 days (inclusive)
+end_date = datetime.utcnow().date()
+start_date = end_date - timedelta(days=29)
 
-current = start_date
+current = datetime.combine(start_date, datetime.min.time())
+end_date = datetime.combine(end_date, datetime.min.time())
 total_loaded = 0
 day_count = 0
 
