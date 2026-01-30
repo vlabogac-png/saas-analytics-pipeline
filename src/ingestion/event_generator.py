@@ -2,10 +2,6 @@
 Synthetic Event Generator for CloudDocs SaaS Analytics
 Generates realistic user behavior events for testing the pipeline.
 
-Author: Vladislav Laboga
-Date: January 2026
-Version: 1.0
-
 This module creates synthetic SaaS product events that simulate real user behavior
 for testing and demonstration purposes. Events follow realistic distributions
 based on actual SaaS analytics patterns.
