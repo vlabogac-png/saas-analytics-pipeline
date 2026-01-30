@@ -8,20 +8,20 @@ A production-grade data engineering project that processes **11.4 million** synt
 
 ![Dashboard Screenshot](dashboard_screenshot.png)
 
-## 🎯 Project Overview
+##  Project Overview
 
 This project demonstrates end-to-end data engineering skills by building a complete analytics pipeline for a fictional SaaS product. The pipeline processes user events, transforms them through multiple layers, and provides actionable insights through interactive dashboards.
 
 **Key Highlights:**
-- 📊 **11.4M events** processed (Jan 2024 - Jan 2026)
-- 🏗️ **4-layer architecture**: Raw → Staging → Core → Analytics
-- ⚙️ **Automated orchestration** with Apache Airflow
-- 📈 **Interactive dashboards** in Metabase
-- 🐳 **Fully containerized** with Docker Compose
+-  **11.4M events** processed (Jan 2024 - Jan 2026)
+-  **4-layer architecture**: Raw → Staging → Core → Analytics
+-  **Automated orchestration** with Apache Airflow
+-  **Interactive dashboards** in Metabase
+-  **Fully containerized** with Docker Compose
 
 ---
 
-## 📊 Live Dashboard
+##  Live Dashboard
 
 The **Executive Overview** dashboard provides real-time insights:
 
@@ -35,7 +35,7 @@ The **Executive Overview** dashboard provides real-time insights:
 
 ---
 
-## 🏗️ Architecture
+##  Architecture
 
 ### Data Flow
 ```
@@ -65,7 +65,7 @@ Metabase Dashboard (BI visualization)
 
 ---
 
-## 🗄️ Database Schema
+##  Database Schema
 
 ### Core Layer (Star Schema)
 
@@ -193,7 +193,7 @@ saas-analytics-pipeline/
 
 ---
 
-## 🔄 ETL Pipeline Details
+##  ETL Pipeline Details
 
 ### Airflow DAG: `saas_analytics_pipeline`
 
@@ -238,7 +238,7 @@ raw_to_staging
 
 ---
 
-## 📈 Sample Analytics Queries
+##  Sample Analytics Queries
 
 ### Feature Adoption Analysis
 ```sql
@@ -307,7 +307,7 @@ SELECT 'Core', COUNT(*) FROM core.fact_events;
 
 ---
 
-## 🧪 Data Quality & Validation
+##  Data Quality & Validation
 
 ### Event Processing Validation
 ```sql
@@ -335,7 +335,7 @@ HAVING COUNT(*) > 1;
 
 ---
 
-## 🔄 CI/CD Pipeline
+##  CI/CD Pipeline
 
 This project includes automated CI/CD workflows using GitHub Actions:
 
@@ -345,12 +345,12 @@ This project includes automated CI/CD workflows using GitHub Actions:
 
 Runs on every push and pull request to `main` and `develop`:
 
-- ✅ **Python Linting** - Black code formatting & Flake8 linting
-- ✅ **SQL Validation** - Syntax checking for DDL and transformation files
-- ✅ **Docker Build** - Validates docker-compose configuration
-- ✅ **Python Tests** - Runs pytest with coverage reporting
-- ✅ **Documentation Check** - Validates README completeness
-- ✅ **Security Scan** - Trivy vulnerability scanner
+-  **Python Linting** - Black code formatting & Flake8 linting
+-  **SQL Validation** - Syntax checking for DDL and transformation files
+-  **Docker Build** - Validates docker-compose configuration
+-  **Python Tests** - Runs pytest with coverage reporting
+-  **Documentation Check** - Validates README completeness
+-  **Security Scan** - Trivy vulnerability scanner
 
 ### Continuous Deployment (CD)
 
@@ -358,8 +358,8 @@ Runs on every push and pull request to `main` and `develop`:
 
 Triggers on version tags (e.g., `v1.0.0`):
 
-- 📦 **GitHub Releases** - Automatic release creation with changelog
-- 📚 **Documentation Deployment** - Updates project documentation
+-  **GitHub Releases** - Automatic release creation with changelog
+-  **Documentation Deployment** - Updates project documentation
 
 ### Code Security
 
@@ -367,8 +367,8 @@ Triggers on version tags (e.g., `v1.0.0`):
 
 Runs weekly and on PRs:
 
-- 🔒 **CodeQL Analysis** - Security and code quality scanning
-- 🛡️ **Dependency Scanning** - Checks for vulnerable dependencies
+-  **CodeQL Analysis** - Security and code quality scanning
+-  **Dependency Scanning** - Checks for vulnerable dependencies
 
 ### Running CI Locally
 
@@ -387,54 +387,24 @@ pytest tests/ -v --cov=src
 docker compose config
 ```
 
----
-
-## 🚧 Future Improvements
-
-### Scalability
-- [ ] Migrate to AWS RDS or Aurora PostgreSQL
-- [ ] Implement CeleryExecutor for distributed processing
-- [ ] Add table partitioning by date
-- [ ] Implement incremental processing with watermarks
-
-### Data Quality
-- [ ] Add Great Expectations for validation
-- [ ] Implement dbt for SQL transformations
-- [ ] Add schema evolution handling
-- [ ] Implement data lineage tracking
-
-### Monitoring
-- [ ] Set up Datadog/Prometheus metrics
-- [ ] Add Airflow SLA monitoring
-- [ ] Implement alerting for failures
-- [ ] Add query performance monitoring
-
-### Security
-- [ ] Move secrets to AWS Secrets Manager
-- [ ] Implement row-level security
-- [ ] Add audit logging
-- [ ] Enable SSL/TLS connections
-
----
-
-## 📚 Learning Outcomes
+## Learning Outcomes
 
 This project demonstrates:
 
-✅ **Data Engineering Fundamentals**
+**Data Engineering Fundamentals**
 - ETL/ELT pipeline design
 - Dimensional modeling (Star Schema)
 - Data quality and validation
 - Incremental vs. full refresh strategies
 
-✅ **Technical Skills**
+**Technical Skills**
 - Apache Airflow orchestration
 - PostgreSQL optimization
 - Docker containerization
 - SQL performance tuning
 - Python data generation
 
-✅ **Best Practices**
+**Best Practices**
 - Version control with Git
 - Comprehensive documentation
 - Modular code structure
@@ -442,7 +412,7 @@ This project demonstrates:
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Starting from Scratch (Reset Everything)
 
@@ -563,7 +533,7 @@ docker system prune -a
 
 ---
 
-## 📊 Key Metrics
+## Key Metrics
 
 | Metric | Value |
 |--------|-------|
@@ -578,11 +548,4 @@ docker system prune -a
 
 ---
 
-## 📄 License
-
-This project is open source and available under the MIT License.
-
----
-
-**Last Updated:** January 8, 2026  
-**Status:** ✅ Complete & Production-Ready
+**Last Updated:** January 30, 2026  
