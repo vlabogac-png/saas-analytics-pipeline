@@ -25,7 +25,7 @@ This project demonstrates end-to-end data engineering skills by building a compl
 
 The **Executive Overview** dashboard provides real-time insights:
 
-- **Total Users**: 2,500 registered users
+- **Total Users**: 6,000 registered users
 - **Daily Active Users**: Trend analysis showing engagement patterns
 - **User Retention Cohorts**: 100% retention for 2024-01 cohort over 3 months
 - **Feature Adoption**: Export to PDF leads with 300k+ uses
