@@ -578,14 +578,6 @@ docker system prune -a
 
 ---
 
-## 📞 Contact
-
-**Developer:** Vladislav Laboga  
-**GitHub:** [@vlabogac-png](https://github.com/vlabogac-png)  
-**Project Repository:** [saas-analytics-pipeline](https://github.com/vlabogac-png/saas-analytics-pipeline)
-
----
-
 ## 📄 License
 
 This project is open source and available under the MIT License.
