@@ -39,6 +39,7 @@ services:
     environment:
       - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql+psycopg2://dataeng:secure_password_123@postgres:5432/saas_analytics
       - AIRFLOW__CORE__FERNET_KEY=zTvhzzia4bPqTDFdvhessP-bHuObXE6MvnMswLkLnHg=
+      - AIRFLOW__WEBSERVER__SECRET_KEY=super-secret-key-12345
       - AIRFLOW__CORE__LOAD_EXAMPLES=false
     depends_on:
       postgres:
