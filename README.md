@@ -277,7 +277,7 @@ ORDER BY activity_date;
 
 ---
 
-## 🛠️ Manual Operations
+## Manual Operations
 
 ### Run Transformations Manually
 
