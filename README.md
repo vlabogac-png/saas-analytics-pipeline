@@ -87,7 +87,7 @@ Metabase Dashboard (BI visualization)
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Docker Desktop (4GB+ RAM recommended)
@@ -161,7 +161,7 @@ open http://localhost:8080
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 saas-analytics-pipeline/
