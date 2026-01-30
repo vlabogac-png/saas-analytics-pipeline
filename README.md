@@ -111,10 +111,10 @@ docker-compose up -d
 docker-compose logs -f airflow-init
 
 # 5. Initialize database schemas (REQUIRED on first run)
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/01_raw_layer.sql
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/02_staging_layer.sql
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/03_core_layer.sql
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/04_analytics_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/01_raw_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/02_staging_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/03_core_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/04_analytics_layer.sql
 
 # 6. Configure Airflow database connection (REQUIRED for DAG execution)
 docker exec saas_airflow_webserver airflow connections add 'postgres_saas' \
@@ -147,6 +147,8 @@ pip install -r requirements.txt
 python generate_current_events.py
 ```
 
+**Important:** The DAG imports event generation modules from `src/`, which is mounted to `/opt/airflow/src` in the Airflow containers. The scripts run locally using the same imports.
+
 ### Run the ETL Pipeline
 
 ```bash
@@ -164,20 +166,19 @@ open http://localhost:8080
 ```
 saas-analytics-pipeline/
 ├── airflow/                    # Airflow home directory
-│   ├── dags/                   # Auto-synced from /dags
+│   ├── dags/                   # DAGs directory
+│   │   └── saas_analytics_dag.py  # Main ETL pipeline DAG
+│   ├── sql/                    # SQL scripts
+│   │   ├── ddl/                # Schema definitions
+│   │   │   ├── 01_raw_layer.sql
+│   │   │   ├── 02_staging_layer.sql
+│   │   │   ├── 03_core_layer.sql
+│   │   │   └── 04_analytics_layer.sql
+│   │   └── transformations/
+│   │       ├── raw_to_staging.sql
+│   │       ├── staging_to_core.sql
+│   │       └── refresh_analytics.sql
 │   └── logs/                   # Execution logs
-├── dags/
-│   └── saas_analytics_dag.py   # Main ETL pipeline DAG
-├── sql/
-│   ├── ddl/                    # Schema definitions
-│   │   ├── 01_raw_layer.sql
-│   │   ├── 02_staging_layer.sql
-│   │   ├── 03_core_layer.sql
-│   │   └── 04_analytics_layer.sql
-│   └── transformations/
-│       ├── raw_to_staging.sql
-│       ├── staging_to_core.sql
-│       └── refresh_analytics.sql
 ├── src/
 │   ├── ingestion/
 │   │   └── event_generator.py  # Synthetic event generator
@@ -282,13 +283,13 @@ ORDER BY activity_date;
 
 ```bash
 # Raw → Staging
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/raw_to_staging.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/transformations/raw_to_staging.sql
 
 # Staging → Core
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/staging_to_core.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/transformations/staging_to_core.sql
 
 # Refresh Analytics
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/transformations/refresh_analytics.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/transformations/refresh_analytics.sql
 ```
 
 ### Database Access
@@ -429,10 +430,10 @@ docker-compose up -d
 docker-compose logs -f airflow-init
 
 # 4. Initialize database schemas (in order!)
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/01_raw_layer.sql
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/02_staging_layer.sql
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/03_core_layer.sql
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/04_analytics_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/01_raw_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/02_staging_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/03_core_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/04_analytics_layer.sql
 
 # 5. Configure Airflow connection
 docker exec saas_airflow_webserver airflow connections add 'postgres_saas' \
@@ -458,10 +459,10 @@ If you see errors like `relation "raw.events" does not exist`:
 
 ```bash
 # Run the DDL files to create the schemas and tables
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/01_raw_layer.sql
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/02_staging_layer.sql
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/03_core_layer.sql
-docker exec -i saas_postgres psql -U dataeng -d saas_analytics < sql/ddl/04_analytics_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/01_raw_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/02_staging_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/03_core_layer.sql
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/04_analytics_layer.sql
 ```
 
 ### Airflow login issues
