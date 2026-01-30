@@ -99,6 +99,31 @@ load_dim_documents = PostgresOperator(
     dag=dag,
 )
 
+load_dim_date = PostgresOperator(
+    task_id="load_dim_date",
+    postgres_conn_id="postgres_saas",
+    sql="""
+        INSERT INTO core.dim_date (
+            date_key, full_date, day_of_week, day_name,
+            week_of_year, month, month_name, quarter, year, is_weekend
+        )
+        SELECT 
+            TO_CHAR(d, 'YYYYMMDD')::INTEGER,
+            d,
+            EXTRACT(DOW FROM d)::INTEGER,
+            TO_CHAR(d, 'Day'),
+            EXTRACT(WEEK FROM d)::INTEGER,
+            EXTRACT(MONTH FROM d)::INTEGER,
+            TO_CHAR(d, 'Month'),
+            EXTRACT(QUARTER FROM d)::INTEGER,
+            EXTRACT(YEAR FROM d)::INTEGER,
+            EXTRACT(DOW FROM d) IN (0, 6)
+        FROM generate_series('2020-01-01'::DATE, '2026-12-31'::DATE, '1 day'::INTERVAL) AS d
+        ON CONFLICT (date_key) DO NOTHING;
+    """,
+    dag=dag,
+)
+
 # Task 3: Load fact table with surrogate keys
 load_fact_events = PostgresOperator(
     task_id="load_fact_events",
@@ -177,6 +202,6 @@ refresh_churn = PostgresOperator(
 )
 
 # Dependencies
-raw_to_staging >> [load_dim_users, load_dim_documents]
-[load_dim_users, load_dim_documents] >> load_fact_events >> load_daily_activity
+raw_to_staging >> [load_dim_users, load_dim_documents, load_dim_date]
+[load_dim_users, load_dim_documents, load_dim_date] >> load_fact_events >> load_daily_activity
 load_daily_activity >> [refresh_retention, refresh_funnel, refresh_churn]

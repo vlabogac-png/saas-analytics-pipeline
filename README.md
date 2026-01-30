@@ -33,6 +33,11 @@ The **Executive Overview** dashboard provides real-time insights:
 
 **Access:** http://localhost:3000 (after running `docker-compose up`)
 
+**Metabase login (default):**
+- Email: `admin@example.com`
+- Password: `admin123`
+- Database name: `saas_analytics`
+
 ---
 
 ##  Architecture
@@ -109,6 +114,9 @@ docker-compose up -d
 
 # 4. Wait for initialization (~2 minutes)
 docker-compose logs -f airflow-init
+
+# Note: Metabase DB is created automatically on first boot. If you already have a
+# Postgres volume, reset with `docker-compose down -v` to re-run init scripts.
 
 # 5. Initialize database schemas (REQUIRED on first run)
 docker exec -i saas_postgres psql -U dataeng -d saas_analytics < airflow/sql/ddl/01_raw_layer.sql
@@ -514,6 +522,34 @@ docker exec saas_airflow_webserver airflow dags unpause saas_analytics_pipeline
 
 # Trigger DAG manually
 docker exec saas_airflow_webserver airflow dags trigger saas_analytics_pipeline
+```
+
+### Test DAG from a clean Core/Analytics state
+
+If you want to validate the DAG end-to-end (including `load_dim_date`), you can
+truncate downstream layers and trigger a fresh run while keeping Raw data:
+
+```bash
+# Clear downstream layers (Raw stays intact)
+docker exec -i saas_postgres psql -U dataeng -d saas_analytics -c "\
+TRUNCATE core.fact_daily_user_activity;\
+TRUNCATE core.fact_events;\
+TRUNCATE core.dim_documents RESTART IDENTITY CASCADE;\
+TRUNCATE core.dim_users RESTART IDENTITY CASCADE;\
+TRUNCATE core.dim_date CASCADE;\
+TRUNCATE staging.events;\
+"
+
+# Trigger the DAG
+docker exec saas_airflow_webserver airflow dags trigger saas_analytics_pipeline
+```
+
+Then verify counts:
+
+```sql
+SELECT COUNT(*) FROM core.dim_date;
+SELECT COUNT(*) FROM core.fact_events;
+SELECT COUNT(*) FROM analytics.feature_adoption_funnel;
 ```
 
 ### Slow queries

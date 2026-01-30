@@ -8,6 +8,7 @@ services:
       POSTGRES_DB: saas_analytics
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d
     ports:
       - "5432:5432"
     healthcheck:
